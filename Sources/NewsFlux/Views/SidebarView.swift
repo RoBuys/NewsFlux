@@ -43,15 +43,44 @@ struct SidebarView: View {
         }
         .listStyle(.sidebar)
         .safeAreaInset(edge: .bottom) {
-            Button {
-                showingAddFeed = true
-            } label: {
-                Label("Ajouter un flux", systemImage: "plus")
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            VStack(alignment: .leading, spacing: 8) {
+                Divider()
+                HStack {
+                    Button {
+                        showingAddFeed = true
+                    } label: {
+                        Label("Ajouter un flux", systemImage: "plus")
+                    }
+                    .keyboardShortcut("n")
+
+                    Spacer()
+
+                    Button {
+                        Task { await store.refresh() }
+                    } label: {
+                        if store.isRefreshing {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Image(systemName: "arrow.clockwise")
+                        }
+                    }
+                    .disabled(store.isRefreshing)
+                    .help("Actualiser les flux (⌘R)")
+                }
+                .buttonStyle(.borderless)
+
+                Group {
+                    if store.isRefreshing {
+                        Text("Actualisation…")
+                    } else if let last = store.lastRefresh {
+                        Text("Actualisé à \(last, format: .dateTime.hour().minute())")
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
-            .buttonStyle(.borderless)
-            .keyboardShortcut("n")
-            .padding(10)
+            .padding(.horizontal, 10)
+            .padding(.bottom, 10)
         }
     }
 }

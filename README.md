@@ -47,3 +47,7 @@ Sources/NewsFlux/
 Sur le SDK macOS 27, `@State` est une macro dont le plugin n'est fourni qu'avec Xcode.
 Pour compiler avec les seules Command Line Tools, le projet utilise l'alias `@ViewState`,
 identique à `@State`. Si Xcode est installé, vous pouvez revenir à `@State`.
+
+## Licence
+
+Distribué sous licence MIT. Voir [LICENSE](LICENSE).

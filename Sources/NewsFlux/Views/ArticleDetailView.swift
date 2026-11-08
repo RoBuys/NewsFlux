@@ -25,6 +25,15 @@ struct ArticleDetailView: View {
                 .pickerStyle(.segmented)
                 .disabled(article.link == nil)
 
+                Button {
+                    store.toggleStar(article)
+                } label: {
+                    Label(store.isStarred(article) ? "Retirer des favoris" : "Ajouter aux favoris",
+                          systemImage: store.isStarred(article) ? "star.fill" : "star")
+                }
+                .keyboardShortcut("d")
+                .help("Favori (⌘D)")
+
                 if let link = article.link {
                     Button { openURL(link) } label: {
                         Label("Ouvrir dans le navigateur", systemImage: "safari")
@@ -50,9 +59,12 @@ struct ArticleDetailView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(store.feed(for: article.feedID)?.title.uppercased() ?? "")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(Color.accentColor)
+                    HStack(spacing: 6) {
+                        FeedIcon(feedID: article.feedID, size: 14)
+                        Text(store.feed(for: article.feedID)?.title.uppercased() ?? "")
+                    }
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.accentColor)
                     Text(article.title)
                         .font(.system(.largeTitle, design: .serif, weight: .bold))
                         .textSelection(.enabled)

@@ -4,6 +4,7 @@ struct ArticleListView: View {
     @Environment(FeedStore.self) private var store
     let articles: [Article]
     @Binding var selection: Article.ID?
+    var emptyMessage = "Aucun article à afficher ici."
 
     var body: some View {
         Group {
@@ -12,18 +13,23 @@ struct ArticleListView: View {
                     ProgressView("Chargement des flux…")
                 } else {
                     ContentUnavailableView("Rien à lire", systemImage: "checkmark.seal",
-                                           description: Text("Aucun article à afficher ici."))
+                                           description: Text(emptyMessage))
                 }
             } else {
                 List(articles, selection: $selection) { article in
                     ArticleRow(article: article, isRead: store.isRead(article),
+                               isStarred: store.isStarred(article),
                                feedTitle: store.feed(for: article.feedID)?.title ?? "")
                         .contextMenu {
                             let read = store.isRead(article)
                             Button(read ? "Marquer comme non lu" : "Marquer comme lu") {
                                 store.markRead(article, !read)
                             }
+                            Button(store.isStarred(article) ? "Retirer des favoris" : "Ajouter aux favoris") {
+                                store.toggleStar(article)
+                            }
                             if let link = article.link {
+                                Divider()
                                 Link("Ouvrir dans le navigateur", destination: link)
                             }
                         }
@@ -37,6 +43,7 @@ struct ArticleListView: View {
 struct ArticleRow: View {
     let article: Article
     let isRead: Bool
+    let isStarred: Bool
     let feedTitle: String
 
     var body: some View {
@@ -53,10 +60,15 @@ struct ArticleRow: View {
                     .lineLimit(2)
 
                 HStack(spacing: 4) {
+                    FeedIcon(feedID: article.feedID, size: 12)
                     Text(feedTitle).lineLimit(1)
                     if let date = article.published {
                         Text("·")
                         Text(date, format: .relative(presentation: .named))
+                    }
+                    if isStarred {
+                        Image(systemName: "star.fill")
+                            .foregroundStyle(.yellow)
                     }
                 }
                 .font(.caption)

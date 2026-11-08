@@ -23,7 +23,10 @@ struct ContentView: View {
             SidebarView(selection: $sidebarSelection, showingAddFeed: $showingAddFeed)
                 .navigationSplitViewColumnWidth(min: 200, ideal: 230)
         } content: {
-            ArticleListView(articles: visibleArticles, selection: $articleSelection)
+            ArticleListView(articles: visibleArticles, selection: $articleSelection,
+                            emptyMessage: currentItem == .starred
+                                ? "Ajoutez des articles aux favoris avec ⌘D ou le menu contextuel."
+                                : "Aucun article à afficher ici.")
                 .navigationTitle(title(for: currentItem))
                 .navigationSubtitle(subtitle)
                 .searchable(text: $search, placement: .toolbar, prompt: "Rechercher")
@@ -64,13 +67,6 @@ struct ContentView: View {
             if let article = store.articles.first(where: { $0.id == id }) { store.markRead(article) }
         }
         .onChange(of: sidebarSelection) { articleSelection = nil }
-        .task {
-            // Actualisation au lancement puis toutes les 15 minutes.
-            while !Task.isCancelled {
-                await store.refresh()
-                try? await Task.sleep(for: .seconds(15 * 60))
-            }
-        }
     }
 
     private var subtitle: String {
@@ -82,6 +78,8 @@ struct ContentView: View {
         switch item {
         case .all: "Tous les articles"
         case .unread: "Non lus"
+        case .starred: "Favoris"
+        case .folder(let name): name
         case .feed(let id): store.feed(for: id)?.title ?? "Flux"
         }
     }

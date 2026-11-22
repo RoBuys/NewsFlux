@@ -33,5 +33,11 @@
 	<true/>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://github.com/RoBuys/NewsFlux/releases/latest/download/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>xWHLT8GxrBh0VPL5FAN0hFDPMFbriq5FV4SNCoSgHMA=</string>
 </dict>
 </plist>

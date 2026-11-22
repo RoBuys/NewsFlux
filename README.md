@@ -15,6 +15,7 @@ Agrégateur de flux RSS / Atom pour macOS, léger et natif (Swift + SwiftUI).
 - Icône dans la barre des menus avec les derniers non lus (désactivable dans Réglages, ⌘,)
 - Notifications des nouveaux articles, à activer flux par flux (clic droit → Activer les notifications)
 - Actualisation parallèle de tous les flux au lancement, puis toutes les 15 min (⌘R pour forcer)
+- Mises à jour automatiques (Sparkle) : menu NewsFlux → Rechercher des mises à jour…
 - Données sauvegardées dans `~/Library/Application Support/NewsFlux/`
 
 ## Prérequis
@@ -34,6 +35,24 @@ swift run
 open build/NewsFlux.app
 ```
 
+## Publier une version
+
+```bash
+scripts/release.sh 1.2.0 notes.md
+```
+
+Le script, lancé depuis `main` sans modifications en attente, met à jour le numéro de version,
+commite, tague et envoie sur GitHub, construit la .app, puis publie la release avec le zip et
+un `appcast.xml` signé. Les apps installées le trouvent à l'adresse
+`https://github.com/RoBuys/NewsFlux/releases/latest/download/appcast.xml` et se mettent à jour.
+
+Les mises à jour sont signées avec une clé EdDSA rangée dans le trousseau (compte « NewsFlux »).
+**Sauvegardez-la** : sans elle, impossible de publier des mises à jour que les apps installées acceptent.
+
+```bash
+.build/artifacts/sparkle/Sparkle/bin/generate_keys --account NewsFlux -x ~/NewsFlux-sparkle-key.txt
+```
+
 ## Structure
 
 ```
@@ -44,7 +63,8 @@ Sources/NewsFlux/
 │   ├── FeedParser.swift     Parseur RSS 2.0 / Atom (XMLParser)
 │   ├── FeedDiscovery.swift  Téléchargement, découverte de flux, icônes
 │   ├── FeedStore.swift      État, actualisation, persistance
-│   └── Notifier.swift       Notifications
+│   ├── Notifier.swift       Notifications
+│   └── Updater.swift        Mises à jour automatiques (Sparkle)
 ├── Views/                   Barre latérale, liste, lecture, ajout de flux, barre des menus
 └── Support/ViewState.swift  Alias de @State (voir ci-dessous)
 ```

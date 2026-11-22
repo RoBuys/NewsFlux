@@ -7,6 +7,7 @@ struct NewsFluxApp: App {
     @NSApplicationDelegateAdaptor private var appDelegate: AppDelegate
     @ViewState private var store = FeedStore()
     @AppStorage(AppDelegate.showMenuBarKey) private var showMenuBar = true
+    @StateObject private var updater = Updater()
 
     var body: some Scene {
         Window("NewsFlux", id: "main") {
@@ -16,6 +17,9 @@ struct NewsFluxApp: App {
         }
         .windowToolbarStyle(.unified)
         .commands {
+            CommandGroup(after: .appInfo) {
+                CheckForUpdatesButton(updater: updater)
+            }
             CommandGroup(after: .newItem) {
                 Button("Actualiser") { Task { await store.refresh() } }
                     .keyboardShortcut("r")
@@ -34,13 +38,14 @@ struct NewsFluxApp: App {
         .menuBarExtraStyle(.window)
 
         Settings {
-            SettingsView()
+            SettingsView(updater: updater)
         }
     }
 }
 
 struct SettingsView: View {
     @AppStorage(AppDelegate.showMenuBarKey) private var showMenuBar = true
+    @ObservedObject var updater: Updater
 
     var body: some View {
         Form {
@@ -51,6 +56,17 @@ struct SettingsView: View {
             Text("Notifications : clic droit sur un flux → « Activer les notifications ».")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+
+            Section("Mises à jour") {
+                Toggle("Rechercher automatiquement les mises à jour", isOn: $updater.automaticallyChecks)
+                    .disabled(!updater.isAvailable)
+                HStack {
+                    Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "dev")")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    CheckForUpdatesButton(updater: updater)
+                }
+            }
         }
         .formStyle(.grouped)
         .frame(width: 420)
